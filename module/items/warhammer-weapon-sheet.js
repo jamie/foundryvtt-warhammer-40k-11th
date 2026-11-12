@@ -1,6 +1,6 @@
 import {FACTIONS, SYSTEM_ID} from "../constants.js";
 
-export class WarhammerWeaponSheet extends ItemSheet {
+export class WarhammerWeaponSheet extends foundry.appv1.sheets.ItemSheet {
     /** @inheritdoc */
     static get defaultOptions() {
         return foundry.utils.mergeObject(super.defaultOptions, {
@@ -83,7 +83,7 @@ export class WarhammerWeaponSheet extends ItemSheet {
         // Get the type of item to create.
         const type = header.dataset.type;
         // Grab any data associated with this control.
-        const system = duplicate(header.dataset);
+        const system = foundry.utils.duplicate(header.dataset);
         // Initialize a default name.
         const name = `New Tag`;
         // Prepare the item object.

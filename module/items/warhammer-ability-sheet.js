@@ -2,9 +2,9 @@ import {SYSTEM_ID} from "../constants.js";
 
 /**
  * Extend the basic ItemSheet with some very simple modifications
- * @extends {ItemSheet}
+ * @extends {foundry.appv1.sheets.ItemSheet}
  */
-export class WarhammerAbilitySheet extends ItemSheet {
+export class WarhammerAbilitySheet extends foundry.appv1.sheets.ItemSheet {
     /** @inheritdoc */
     static get defaultOptions() {
         return foundry.utils.mergeObject(super.defaultOptions, {
@@ -27,9 +27,8 @@ export class WarhammerAbilitySheet extends ItemSheet {
     async getData(options) {
         const context = super.getData(options)
         context.system = context.data.system;
-        context.descriptionHTML = await TextEditor.enrichHTML(context.system.description, {
-            secrets: this.document.isOwner,
-            async: true
+        context.descriptionHTML = await foundry.applications.ux.TextEditor.implementation.enrichHTML(context.system.description, {
+            secrets: this.document.isOwner
         });
         return context;
     }

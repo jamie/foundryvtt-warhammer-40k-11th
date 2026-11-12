@@ -1,6 +1,6 @@
 import {SYSTEM_ID} from "../constants.js";
 
-export class WarhammerObjectiveSheet extends ActorSheet {
+export class WarhammerObjectiveSheet extends foundry.appv1.sheets.ActorSheet {
     /** @inheritdoc */
     static get defaultOptions() {
         return foundry.utils.mergeObject(super.defaultOptions, {

@@ -3,9 +3,9 @@ import { WarhammerActor } from "./actor.js";
 
 /**
  * Extend the basic ActorSheet with some very simple modifications
- * @extends {ActorSheet}
+ * @extends {foundry.appv1.sheets.ActorSheet}
  */
-export class WarhammerModelSheet extends ActorSheet {
+export class WarhammerModelSheet extends foundry.appv1.sheets.ActorSheet {
     /** @inheritdoc */
     static get defaultOptions() {
         return foundry.utils.mergeObject(super.defaultOptions, {
@@ -64,7 +64,7 @@ export class WarhammerModelSheet extends ActorSheet {
         // Add roll data for TinyMCE editors.
         context.rollData = context.actor.getRollData();
         context.enriched = {};
-        context.enriched.biography = await TextEditor.enrichHTML(actorData.biography, { async: true })
+        context.enriched.biography = await foundry.applications.ux.TextEditor.implementation.enrichHTML(actorData.biography)
 
         // context.CONFIG = CONFIG
         return context;
@@ -170,7 +170,7 @@ export class WarhammerModelSheet extends ActorSheet {
         // Get the type of item to create.
         const type = header.dataset.type;
         // Grab any data associated with this control.
-        const system = foundy.utils.duplicate(header.dataset);
+        const system = foundry.utils.duplicate(header.dataset);
         // Initialize a default name.
         const name = `New ${type.capitalize()}`;
         // Prepare the item object.

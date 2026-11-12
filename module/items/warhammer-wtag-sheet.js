@@ -1,6 +1,6 @@
 import {SYSTEM_ID} from "../constants.js";
 
-export class WarhammerWTagSheet extends ItemSheet {
+export class WarhammerWTagSheet extends foundry.appv1.sheets.ItemSheet {
     /** @inheritdoc */
     static get defaultOptions() {
         return foundry.utils.mergeObject(super.defaultOptions, {

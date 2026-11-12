@@ -98,15 +98,14 @@ Hooks.once('init', function () {
         decimals: 2,
     };
     // Register sheet application classes
-    const Actors = foundry.documents.collections.Actors;
-    const Items = foundry.documents.collections.Items;
-    Actors.unregisterSheet("core", ActorSheet);
-    Actors.registerSheet(SYSTEM_ID, WarhammerModelSheet, { types: ["model"], makeDefault: true });
-    Actors.registerSheet(SYSTEM_ID, WarhammerObjectiveSheet, { types: ["objective"], makeDefault: true });
-    Items.unregisterSheet("core", ItemSheet);
-    Items.registerSheet(SYSTEM_ID, WarhammerAbilitySheet, { types: ["ability"], makeDefault: true });
-    Items.registerSheet(SYSTEM_ID, WarhammerWeaponSheet, { types: ["weapon"], makeDefault: true });
-    Items.registerSheet(SYSTEM_ID, WarhammerWTagSheet, { types: ["wtag"], makeDefault: true });
+    const DocumentSheetConfig = foundry.applications.apps.DocumentSheetConfig;
+    DocumentSheetConfig.unregisterSheet(Actor, "core", foundry.appv1.sheets.ActorSheet);
+    DocumentSheetConfig.registerSheet(Actor, SYSTEM_ID, WarhammerModelSheet, { types: ["model"], makeDefault: true, label: "Model" });
+    DocumentSheetConfig.registerSheet(Actor, SYSTEM_ID, WarhammerObjectiveSheet, { types: ["objective"], makeDefault: true, label: "Objective" });
+    DocumentSheetConfig.unregisterSheet(Item, "core", foundry.appv1.sheets.ItemSheet);
+    DocumentSheetConfig.registerSheet(Item, SYSTEM_ID, WarhammerAbilitySheet, { types: ["ability"], makeDefault: true, label: "Ability" });
+    DocumentSheetConfig.registerSheet(Item, SYSTEM_ID, WarhammerWeaponSheet, { types: ["weapon"], makeDefault: true, label: "Weapon" });
+    DocumentSheetConfig.registerSheet(Item, SYSTEM_ID, WarhammerWTagSheet, { types: ["wtag"], makeDefault: true, label: "Weapon Tag" });
 
     // DocumentSheetConfig.registerSheet(TokenDocument, SYSTEM_ID, WarhammerTokenConfig, { makeDefault: true });
 

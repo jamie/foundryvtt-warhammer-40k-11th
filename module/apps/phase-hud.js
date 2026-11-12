@@ -1,4 +1,6 @@
-export class PhaseHUD extends Application {
+import { SYSTEM_ID } from "../constants.js";
+
+export class PhaseHUD extends foundry.appv1.api.Application {
     constructor() {
         super();
         this.token = null;
@@ -7,7 +9,7 @@ export class PhaseHUD extends Application {
     static get defaultOptions() {
         return foundry.utils.mergeObject(super.defaultOptions, {
             id: "phase-hud",
-            template: "systems/warhammer-40k-10th/templates/apps/phase-hud.hbs",
+            template: `systems/${SYSTEM_ID}/templates/apps/phase-hud.hbs`,
             popOut: true,
             minimizable: false,
             classes: ["phase-hud"],
