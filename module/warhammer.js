@@ -295,75 +295,50 @@ Hooks.on('renderActorDirectory', (app, html, data) => {
     //return early if user isn't a gm (and thus can't create folders, which the importer does)
     if (!game.user.isGM) return
 
-    console.log("Warhammer 40k | Hook renderActorDirectory fired");
-    const $html = $(html);
-    console.log("Warhammer 40k | Directory HTML classes:", $html[0]?.className);
+    // Avoid duplicate buttons if the hook fires multiple times
+    if (html.querySelector(".import-roster")) return;
 
-    console.log("Warhammer 40k | Directory HTML classes:", $html[0]?.className);
-
-    // Try multiple selectors to find the correct container for buttons
-    let actions = $html.find('.header-actions.action-buttons');
-    if (!actions.length) actions = $html.find('.header-actions');
-    if (!actions.length) actions = $html.find('.action-buttons');
+    let actions = html.querySelector(".header-actions");
 
     // Fallback: directory header itself if we really can't find the buttons area
-    if (!actions.length) {
-        console.warn("Warhammer 40k | Specific action container not found. Checking .directory-header");
-        const dirHeader = $html.find('.directory-header');
-        if (dirHeader.length) {
-            console.log("Warhammer 40k | Found .directory-header, creating a container.");
-            // Create a container if it doesn't exist, to keep things tidy
-            actions = $(`<div class="header-actions action-buttons flexrow"></div>`);
-            dirHeader.append(actions);
+    if (!actions) {
+        actions = document.createElement("div");
+        actions.className = "header-actions action-buttons flexrow";
+        const header = html.querySelector(":scope > header, .directory-header");
+        if (!header) {
+            console.error("Warhammer 40k | Failed to find OR create a container to inject Import Roster button");
+            return;
         }
+        header.append(actions);
     }
 
-    console.log("Warhammer 40k | Final actions container length:", actions.length);
+    const importBtn = document.createElement("button");
+    importBtn.type = "button";
+    importBtn.className = "import-roster";
+    importBtn.innerHTML = `<i class="fas fa-file-import"></i> Import Roster`;
+    importBtn.addEventListener("click", ev => {
+        ev.preventDefault();
+        renderImportDialog();
+    });
 
-    if (actions.length) {
-        const btn = $(`<button class='import-roster'><i class="fas fa-file-import"></i> Import Roster</button>`);
-
-        // Avoid duplicate buttons if the hook fires multiple times
-        if (actions.find('.import-roster').length === 0) {
-            actions.append(btn);
-            btn.click((ev) => {
-                ev.preventDefault();
-                renderImportDialog();
-            });
-            console.log("Warhammer 40k | Import Roster button injected successfully.");
-        } else {
-            console.log("Warhammer 40k | Import Roster button already exists.");
-        }
-
-        const updateBtn = $(`<button class='update-sizes'><i class="fas fa-ruler-combined"></i> Update Base Sizes</button>`);
-        if (actions.find('.update-sizes').length === 0) {
-            actions.append(updateBtn);
-            updateBtn.click((ev) => {
-                ev.preventDefault();
-                Dialog.confirm({
-                    title: "Update All Base Sizes",
-                    content: "<p>This will iterate through <strong>ALL</strong> actors in your world and attempt to update their prototype token sizes based on their name using Wahapedia data.<br><br>Are you sure you want to continue?</p>",
-                    yes: async () => {
-                        const { RosterImporter } = await import("./importer.js");
-                        RosterImporter.updateAllBaseSizes();
-                    },
-                    defaultYes: false
-                });
-            });
-            console.log("Warhammer 40k | Update Base Sizes button injected successfully.");
-        }
-
-    } else {
-        console.error("Warhammer 40k | Failed to find OR create a container to inject Import Roster button");
-        // Last ditch effort: Inject directly into the main html container
-        console.warn("Warhammer 40k | Attempting last-ditch injection into root.");
-        const btn = $(`<button class='import-roster'><i class="fas fa-file-import"></i> Import Roster</button>`);
-        $html.prepend(btn);
-        btn.click((ev) => {
-            ev.preventDefault();
-            renderImportDialog();
+    const updateBtn = document.createElement("button");
+    updateBtn.type = "button";
+    updateBtn.className = "update-sizes";
+    updateBtn.innerHTML = `<i class="fas fa-ruler-combined"></i> Update Base Sizes`;
+    updateBtn.addEventListener("click", async ev => {
+        ev.preventDefault();
+        const confirmed = await foundry.applications.api.DialogV2.confirm({
+            window: { title: "Update All Base Sizes" },
+            content: "<p>This will iterate through <strong>ALL</strong> actors in your world and attempt to update their prototype token sizes based on their name using Wahapedia data.<br><br>Are you sure you want to continue?</p>",
+            rejectClose: false,
+            modal: true,
         });
-    }
+        if (!confirmed) return;
+        const { RosterImporter } = await import("./importer.js");
+        RosterImporter.updateAllBaseSizes();
+    });
+
+    actions.append(importBtn, updateBtn);
 });
 
 
@@ -371,17 +346,17 @@ Hooks.on('renderActorDirectory', (app, html, data) => {
 
 
 function renderImportDialog() {
-    new Dialog({
-        title: "Roster Import",
-        content: "<form autocomplete=\"off\" onsubmit=\"event.preventDefault();\">\n" +
-            "    <p class=\"notes\">You may import a roster in the .ros format</p>\n" +
-            "    <div class=\"form-group\">\n" +
-            "        <label for=\"data\">Roster File</label>\n" +
-            "        <input type=\"file\" name=\"data\" accept='.ros,.json'/>\n" +
-            "    </div>\n",
-        buttons: {
-            updateSizes: {
-                icon: '<i class="fas fa-ruler-combined"></i>',
+    foundry.applications.api.DialogV2.wait({
+        window: { title: "Roster Import" },
+        content: "<p class=\"notes\">You may import a roster in the .ros format</p>\n" +
+            "<div class=\"form-group\">\n" +
+            "    <label for=\"data\">Roster File</label>\n" +
+            "    <input type=\"file\" name=\"data\" accept='.ros,.json'/>\n" +
+            "</div>\n",
+        buttons: [
+            {
+                action: "updateSizes",
+                icon: "fa-solid fa-ruler-combined",
                 label: "Update Base Sizes",
                 callback: async () => {
                     const { RosterImporter } = await import("./importer.js");
@@ -389,37 +364,39 @@ function renderImportDialog() {
                     ui.notifications.info("Base sizes updated from Wahapedia");
                 }
             },
-            import: {
-                icon: "<i class=\"fas fa-file-import\"></i>",
+            {
+                action: "import",
+                icon: "fa-solid fa-file-import",
                 label: "Import",
-                cssClass: "import default",
-                callback: async html => {
-                    const form = html.find("form")[0];
-                    if (!form.data.files.length) return ui.notifications.error("You did not upload a data file!");
+                default: true,
+                callback: async (event, button, dialog) => {
+                    const files = button.form.elements.data.files;
+                    if (!files.length) return ui.notifications.error("You did not upload a data file!");
                     const { RosterImporter } = await import("./importer.js");
-                    readTextFromFile(form.data.files[0]).then(content => RosterImporter.import(content));
+                    const content = await foundry.utils.readTextFromFile(files[0]);
+                    RosterImporter.import(content);
                 }
             },
-            no: {
-                icon: "<i class=\"fas fa-times\"></i>",
-                label: "Cancel",
-                cssClass: "no"
+            {
+                action: "no",
+                icon: "fa-solid fa-xmark",
+                label: "Cancel"
             }
-        }
-    }).render(true);
+        ],
+        rejectClose: false,
+    });
 }
 
 // Phase HUD Integration
-Hooks.on("getActorDirectoryFolderContext", (html, options) => {
+Hooks.on("getFolderContextOptions", (app, options) => {
+    if (!(app instanceof foundry.applications.sidebar.tabs.ActorDirectory)) return;
     options.push({
-        name: "Add Army to Combat",
-        icon: '<i class="fas fa-swords"></i>',
-        condition: (header) => {
-            return game.user.isGM;
-        },
-        callback: async (header) => {
-            const folderId = header.parent().data("folderId");
-            const folder = game.folders.get(folderId);
+        label: "Add Army to Combat",
+        icon: "fa-solid fa-swords",
+        visible: () => game.user.isGM,
+        onClick: async (event, header) => {
+            const el = header.closest("[data-uuid], [data-folder-id]");
+            const folder = el?.dataset.uuid ? fromUuidSync(el.dataset.uuid) : game.folders.get(el?.dataset.folderId);
 
             if (!folder) return;
 
