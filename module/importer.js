@@ -2,6 +2,10 @@ import { FACTIONS, SYSTEM_ID } from "./constants.js";
 import { TokenGenerator } from "./token_generator.js";
 
 const OPTIONAL_TAGS = ['HEAVY', 'LANCE', 'INDIRECT FIRE']
+
+// ActiveEffect changes live under system.changes in v14, with a string type instead of a numeric mode
+const overrideChange = (key, value) => ({ key, type: "override", value: String(value), phase: "initial" })
+
 export class RosterImporter {
     static async import(content) {
         if (content.trim().startsWith("{")) {
@@ -152,21 +156,13 @@ export class RosterImporter {
             if (data.name === "Stealth") {
                 await ActiveEffect.create({
                     name: data.name,
-                    changes: [{
-                        key: 'system.modifiers.grants.hitroll.ranged.bonus',
-                        value: -1,
-                        mode: 5,
-                    }]
+                    system: { changes: [overrideChange('system.modifiers.grants.hitroll.ranged.bonus', -1)] }
                 }, { parent: actor })
             }
             if (data.name === "Lone Operative") {
                 await ActiveEffect.create({
                     name: data.name,
-                    changes: [{
-                        key: 'system.loneOperative',
-                        value: true,
-                        mode: 5,
-                    }]
+                    system: { changes: [overrideChange('system.loneOperative', true)] }
                 }, { parent: actor })
             }
 
@@ -188,12 +184,7 @@ export class RosterImporter {
             if (data.name === "Invulnerable Save") {
                 await ActiveEffect.create({
                     name: data.name,
-                    changes: [{
-                        key: 'system.invulnsave',
-                        //NOTE make this less fragile at some point
-                        value: data.system.description.match(/(\d)+/)[1],
-                        mode: 5,
-                    }]
+                    system: { changes: [overrideChange('system.invulnsave', data.system.description.match(/(\d)+/)[1])] }
                 }, { parent: actor })
                 return
             }
@@ -556,13 +547,13 @@ export class RosterImporter {
                 if (data.name === "Stealth") {
                     await ActiveEffect.create({
                         name: data.name,
-                        changes: [{ key: 'system.modifiers.grants.hitroll.ranged.bonus', value: -1, mode: 5 }]
+                        system: { changes: [overrideChange('system.modifiers.grants.hitroll.ranged.bonus', -1)] }
                     }, { parent: actor });
                 }
                 if (data.name === "Lone Operative") {
                     await ActiveEffect.create({
                         name: data.name,
-                        changes: [{ key: 'system.loneOperative', value: true, mode: 5 }]
+                        system: { changes: [overrideChange('system.loneOperative', true)] }
                     }, { parent: actor });
                 }
                 await Item.create(data, { parent: actor });
@@ -582,11 +573,7 @@ export class RosterImporter {
                     if (data.name === "Invulnerable Save") {
                         await ActiveEffect.create({
                             name: data.name,
-                            changes: [{
-                                key: 'system.invulnsave',
-                                value: desc.match(/(\d)+/)[1],
-                                mode: 5,
-                            }]
+                            system: { changes: [overrideChange('system.invulnsave', desc.match(/(\d)+/)[1])] }
                         }, { parent: actor })
                         return
                     }

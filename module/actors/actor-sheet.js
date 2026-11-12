@@ -189,21 +189,16 @@ export class WarhammerModelSheet extends foundry.appv1.sheets.ActorSheet {
         const header = event.currentTarget;
         // Get the type of item to create.
         const type = header.dataset.type;
-        // Grab any data associated with this control.
-        const system = duplicate(header.dataset);
         // Initialize a default name.
         const name = `New ${type.capitalize()} Effect`;
-        // Prepare the item object.
+        // Prepare the effect object.
         const itemData = {
             name: name,
-            system: system
         };
         if (type === "temporary")
-            itemData.duration = { seconds: 60 }
+            itemData.duration = { value: 60, units: "seconds" }
         if (type === "inactive")
             itemData.disabled = true
-        // Remove the type from the dataset since it's in the itemData.type prop.
-        delete itemData.system["type"];
 
         return ActiveEffect.create(itemData, { parent: this.actor });
     }
