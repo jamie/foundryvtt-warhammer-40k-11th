@@ -21,7 +21,34 @@
   "manifest": "#{MANIFEST}#",
   "download": "#{DOWNLOAD}#",
   "compatibility": {
-    "minimum": "13",
-    "verified": "13"
+    "minimum": "14",
+    "verified": "14"
+  },
+  "documentTypes": {
+    "Actor": {
+      "model": {
+        "htmlFields": [
+          "biography"
+        ]
+      },
+      "objective": {}
+    },
+    "Item": {
+      "ability": {
+        "htmlFields": [
+          "description"
+        ]
+      },
+      "weapon": {
+        "htmlFields": [
+          "description"
+        ]
+      },
+      "wtag": {
+        "htmlFields": [
+          "description"
+        ]
+      }
+    }
   }
 }

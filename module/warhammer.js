@@ -6,6 +6,7 @@ import { preloadHandlebarsTemplates } from "./templates.js";
 import { WarhammerModelData } from "./actors/warhammerModelData.js";
 import { WeaponData } from "./items/weaponData.js";
 import { WeaponTagData } from "./items/weaponTagData.js";
+import { AbilityData } from "./items/abilityData.js";
 import { WarhammerAbilitySheet } from "./items/warhammer-ability-sheet.js";
 import { WarhammerWeaponSheet } from "./items/warhammer-weapon-sheet.js";
 import { WarhammerWTagSheet } from "./items/warhammer-wtag-sheet.js";
@@ -39,6 +40,7 @@ Hooks.once('init', function () {
     //define data models
     CONFIG.Actor.dataModels.model = WarhammerModelData;
     CONFIG.Actor.dataModels.objective = WarhammerObjectiveData;
+    CONFIG.Item.dataModels.ability = AbilityData;
     CONFIG.Item.dataModels.weapon = WeaponData;
     CONFIG.Item.dataModels.wtag = WeaponTagData;
 

@@ -1,6 +1,6 @@
 import {WarhammerToken} from "../token.js";
 
-export class WarhammerObjectiveData extends foundry.abstract.DataModel {
+export class WarhammerObjectiveData extends foundry.abstract.TypeDataModel {
     static defineSchema() {
         const fields = foundry.data.fields;
         return {
