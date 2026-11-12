@@ -192,14 +192,14 @@ export class WarhammerCombat extends Combat {
     }
 
     async addCP(armyId, amount) {
-        const history = this.getFlag(SYSTEM_ID, "cp") || {};
+        const history = foundry.utils.deepClone(this.getFlag(SYSTEM_ID, "cp") || {});
         const current = history[armyId] || 0;
         history[armyId] = Math.max(0, current + amount);
         return this.setFlag(SYSTEM_ID, "cp", history);
     }
 
     async addVP(armyId, amount) {
-        const history = this.getFlag(SYSTEM_ID, "vp") || {};
+        const history = foundry.utils.deepClone(this.getFlag(SYSTEM_ID, "vp") || {});
         const current = history[armyId] || 0;
         history[armyId] = Math.max(0, current + amount);
         return this.setFlag(SYSTEM_ID, "vp", history);

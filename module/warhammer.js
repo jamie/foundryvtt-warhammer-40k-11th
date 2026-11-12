@@ -50,8 +50,6 @@ Hooks.once('init', function () {
     CONFIG.Token.documentClass = WarhammerTokenDocument;
     CONFIG.Combat.documentClass = WarhammerCombat;
     CONFIG.ui.combat = WarhammerCombatTracker;
-    console.log("Warhammer 40k | Combat Class Registered (Refresh Check):", CONFIG.Combat.documentClass);
-    console.log("Warhammer 40k | Combat Tracker Registered (Refresh Check):", CONFIG.ui.combat);
     game.settings.register(SYSTEM_ID, "baseSizes", {
         name: "Base Sizes",
         scope: "world",
@@ -131,11 +129,6 @@ Hooks.once('init', function () {
     CONFIG.Token.objectClass = WarhammerToken;
 
     return preloadHandlebarsTemplates();
-});
-
-Hooks.once('setup', function () {
-    CONFIG.ui.combat = WarhammerCombatTracker;
-    console.log("Warhammer 40k | Combat Tracker Re-Registered in Setup:", CONFIG.ui.combat);
 });
 
 //turn tag string into array of tags
@@ -465,14 +458,6 @@ Hooks.on("getActorDirectoryFolderContext", (html, options) => {
 });
 
 Hooks.once("ready", async () => {
-    // Force Combat Tracker Registration (Last Resort)
-    if (CONFIG.ui.combat !== WarhammerCombatTracker) {
-        CONFIG.ui.combat = WarhammerCombatTracker;
-        ui.combat = new WarhammerCombatTracker({ popOut: false });
-        ui.combat.render(true);
-        console.log("Warhammer 40k | Combat Tracker FORCED in Ready Hook");
-    }
-
     // Dynamically import the class to avoid circular dependencies if any
     const { PhaseHUD } = await import("./apps/phase-hud.js");
     game.phaseHUD = new PhaseHUD();
