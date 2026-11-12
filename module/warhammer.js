@@ -226,27 +226,34 @@ function updateTokenRulerState(newState) {
 }
 
 Hooks.on("renderActiveEffectConfig", function (application, html, data) {
-    let inputs = html.find(".key input")
-    $.map(inputs, input => {
-        new Awesomplete(input, {
-            list: Object.keys(foundry.utils.flattenObject(application.object.parent.system)).map(s => "system." + s)
-        });
-    })
+    const system = application.document.parent?.system;
+    if (!system) return;
+    const list = Object.keys(foundry.utils.flattenObject(system)).map(s => "system." + s);
+    const inputs = html.querySelectorAll('input[name^="changes."][name$=".key"], input[name^="system.changes."][name$=".key"]');
+    for (const input of inputs) {
+        if (input.closest(".awesomplete")) continue;
+        new Awesomplete(input, { list });
+    }
 })
 
 Hooks.on("renderTokenConfig", function (config, html, data) {
-    let injectedHTML = `
+    const flags = (config.document ?? config.token)?.flags?.[SYSTEM_ID];
+    const offX = flags?.offX ? `value="${flags.offX}"` : "";
+    const offY = flags?.offY ? `value="${flags.offY}"` : "";
+    const template = document.createElement("template");
+    template.innerHTML = `
             <div class="form-group slim">
             <label>Art Offset</label>
             <div class="form-fields">
                 <label>X</label>
-                <input type="number" step="1" name="flags.${SYSTEM_ID}.offX" placeholder="px" ${config.token.getFlag(SYSTEM_ID, "offX") ? "value=\"" + config.token.getFlag(SYSTEM_ID, "offX") + "\"" : ""}>
+                <input type="number" step="1" name="flags.${SYSTEM_ID}.offX" placeholder="px" ${offX}>
                 <label>Y</label>
-                <input type="number" step="1" name="flags.${SYSTEM_ID}.offY" placeholder="px" ${config.token.getFlag(SYSTEM_ID, "offY") ? "value=\"" + config.token.getFlag(SYSTEM_ID, "offY") + "\"" : ""}>
+                <input type="number" step="1" name="flags.${SYSTEM_ID}.offY" placeholder="px" ${offY}>
             </div>
         </div>
 `
-    html.find("[name=width]").closest(".form-group").after(injectedHTML)
+    if (html.querySelector(`[name="flags.${SYSTEM_ID}.offX"]`)) return;
+    html.querySelector("[name=width]")?.closest(".form-group")?.after(template.content);
 })
 
 let updateObjectives = foundry.utils.debounce(() => {
