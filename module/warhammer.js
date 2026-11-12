@@ -162,7 +162,7 @@ Hooks.on('preCreateActor', function (actor, data, options, userid) {
     }
 })
 //stolen from https://gitlab.com/tposney/midi-qol/-/blob/v11/src/module/chatMessageHandling.ts
-Hooks.on('renderChatMessage', function (message, html, messageData) {
+Hooks.on('renderChatMessageHTML', function (message, html, messageData) {
     let _highlighted = null;
 
     let _onTargetHover = (event) => {
@@ -195,36 +195,29 @@ Hooks.on('renderChatMessage', function (message, html, messageData) {
         token?.control({ multiSelect: false, releaseOthers: true });
     };
 
-
-    let ids = html.find(".selectable-target-name")
-
-    ids.hover(_onTargetHover, _onTargetHoverOut)
-    ids.click(_onTargetSelect);
+    for (const el of html.querySelectorAll(".selectable-target-name")) {
+        el.addEventListener("mouseenter", _onTargetHover);
+        el.addEventListener("mouseleave", _onTargetHoverOut);
+        el.addEventListener("click", _onTargetSelect);
+    }
 })
 
 
-export let tokenRulerTool;
 // Inject Terrain Ruler into the scene control buttons
 Hooks.on("getSceneControlButtons", controls => {
-    if (!tokenRulerTool) {
-        tokenRulerTool = {
-            name: "tokenRuler",
-            title: "measure base-to-base",
-            icon: "fas fa-circle-nodes",
-            toggle: true,
-            active: tokenRuler?.active,
-            onClick: updateTokenRulerState,
-            visible: true,
-        }
-    }
-    // Handle case where controls might not be the array we expect
-    if (!controls || !Array.isArray(controls)) return;
+    const tokenControl = controls.tokens;
+    if (!tokenControl) return;
 
-    const tokenGroup = controls.find(group => group.name === "token");
-    if (tokenGroup) {
-        const tokenControls = tokenGroup.tools;
-        tokenControls.splice(tokenControls.findIndex(tool => tool.name === "ruler") + 1, 0, tokenRulerTool)
-    }
+    tokenControl.tools.tokenRuler = {
+        name: "tokenRuler",
+        title: "measure base-to-base",
+        icon: "fa-solid fa-circle-nodes",
+        order: Object.keys(tokenControl.tools).length,
+        toggle: true,
+        active: tokenRuler?.active,
+        onChange: (event, active) => updateTokenRulerState(active),
+        visible: true,
+    };
 })
 
 function updateTokenRulerState(newState) {
@@ -486,19 +479,21 @@ Hooks.once("ready", async () => {
     });
 
     // Chat Message Listeners
-    Hooks.on("renderChatMessage", (message, html, data) => {
-        const $html = $(html); // Ensure jQuery object
+    Hooks.on("renderChatMessageHTML", (message, html, data) => {
+        const onClick = (selector, handler) => {
+            for (const el of html.querySelectorAll(selector)) el.addEventListener("click", handler);
+        };
 
         // Roll Attacks Listener
-        $html.find(".roll-attacks").click(async (ev) => {
+        onClick(".roll-attacks", async (ev) => {
             ev.preventDefault();
-            const btn = $(ev.currentTarget);
-            const attacksFormula = btn.data("attacks").toString();
-            const skill = parseInt(btn.data("skill")) || 6;
-            const strength = btn.data("strength");
-            const ap = btn.data("ap");
-            const damage = btn.data("damage");
-            const weaponName = btn.data("weapon");
+            const btn = ev.currentTarget.dataset;
+            const attacksFormula = btn.attacks;
+            const skill = parseInt(btn.skill) || 6;
+            const strength = btn.strength;
+            const ap = btn.ap;
+            const damage = btn.damage;
+            const weaponName = btn.weapon;
 
             // 1. Determine Number of Attacks
             let numAttacks = 1;
@@ -580,14 +575,14 @@ Hooks.once("ready", async () => {
         });
 
         // Roll Wounds Listener
-        $html.find(".roll-wounds").click(async (ev) => {
+        onClick(".roll-wounds", async (ev) => {
             ev.preventDefault();
-            const btn = $(ev.currentTarget);
-            const hits = parseInt(btn.data("hits"));
-            const strength = parseInt(btn.data("strength"));
-            const ap = btn.data("ap");
-            const damage = btn.data("damage");
-            const weaponName = btn.data("weapon");
+            const btn = ev.currentTarget.dataset;
+            const hits = parseInt(btn.hits);
+            const strength = parseInt(btn.strength);
+            const ap = btn.ap;
+            const damage = btn.damage;
+            const weaponName = btn.weapon;
 
             // 1. Get Target Stats (Toughness & Save)
             let toughness = 4;
@@ -607,15 +602,11 @@ Hooks.once("ready", async () => {
             } else {
                 // Ask for toughness (fallback)
                 // We won't ask for Save here to keep it simple, straightforward flow is better
-                const tInput = await new Promise(resolve => {
-                    new Dialog({
-                        title: "Target Toughness",
-                        content: `<div class="form-group"><label>Toughness:</label><input type="number" id="toughness" value="4" autofocus></div>`,
-                        buttons: {
-                            ok: { label: "Roll", callback: html => resolve(html.find("#toughness").val()) }
-                        },
-                        default: "ok"
-                    }).render(true);
+                const tInput = await foundry.applications.api.DialogV2.prompt({
+                    window: { title: "Target Toughness" },
+                    content: `<div class="form-group"><label>Toughness:</label><input type="number" name="toughness" value="4" autofocus></div>`,
+                    ok: { label: "Roll", callback: (event, button) => button.form.elements.toughness.value },
+                    rejectClose: false,
                 });
                 toughness = parseInt(tInput) || 4;
             }
@@ -692,11 +683,11 @@ Hooks.once("ready", async () => {
         });
 
         // Roll Damage Listener
-        $html.find(".roll-damage").click(async (ev) => {
+        onClick(".roll-damage", async (ev) => {
             ev.preventDefault();
-            const btn = $(ev.currentTarget);
-            const damageFormula = btn.data("damage").toString();
-            const weaponName = btn.data("weapon");
+            const btn = ev.currentTarget.dataset;
+            const damageFormula = btn.damage;
+            const weaponName = btn.weapon;
 
             const roll = await new Roll(damageFormula).evaluate();
 
@@ -707,17 +698,17 @@ Hooks.once("ready", async () => {
         });
 
         // Roll Saves Listener
-        $html.find(".roll-saves").click(async (ev) => {
+        onClick(".roll-saves", async (ev) => {
             ev.preventDefault();
-            const btn = $(ev.currentTarget);
-            const numWounds = parseInt(btn.data("wounds"));
-            const sv = parseInt(btn.data("save"));
-            const invulnData = btn.data("invuln");
+            const btn = ev.currentTarget.dataset;
+            const numWounds = parseInt(btn.wounds);
+            const sv = parseInt(btn.save);
+            const invulnData = btn.invuln;
             const invuln = invulnData === "" ? null : parseInt(invulnData);
-            const ap = parseInt(btn.data("ap")) || 0; // AP is usually negative e.g. -1
-            const damage = btn.data("damage");
-            const targetName = btn.data("name");
-            const targetUuid = btn.data("uuid");
+            const ap = parseInt(btn.ap) || 0; // AP is usually negative e.g. -1
+            const damage = btn.damage;
+            const targetName = btn.name;
+            const targetUuid = btn.uuid;
 
             // Logic: Target Number = Sv - AP. (e.g. 3+ minus -1 AP = 4+).
             // If Invuln is better (lower), use Invuln. Invuln is NOT modified by AP.
@@ -802,13 +793,13 @@ Hooks.once("ready", async () => {
         });
 
         // Apply Damage Listener
-        $html.find(".apply-damage").click(async (ev) => {
+        onClick(".apply-damage", async (ev) => {
             ev.preventDefault();
-            const btn = $(ev.currentTarget);
-            const targetUuid = btn.data("uuid");
-            const damageFormula = btn.data("damage").toString();
-            const failed = parseInt(btn.data("failed"));
-            const targetName = btn.data("name");
+            const btn = ev.currentTarget.dataset;
+            const targetUuid = btn.uuid;
+            const damageFormula = btn.damage;
+            const failed = parseInt(btn.failed);
+            const targetName = btn.name;
 
             const tokenDocument = await fromUuid(targetUuid);
             const actor = tokenDocument?.actor || tokenDocument;
