@@ -508,7 +508,7 @@ export class WarhammerItem extends Item {
         return 5
     }
 
-    async _battleToMessage(data, messageData={}, {rollMode, create=true}={}) {
+    async _battleToMessage(data, messageData={}, {messageMode, create=true}={}) {
 
         data.models = WarhammerActor.reduceToCount(data.models)
         data.targets = WarhammerActor.reduceToCount(data.targets)
@@ -519,7 +519,7 @@ export class WarhammerItem extends Item {
         messageData = foundry.utils.mergeObject({
             speaker: ChatMessage.getSpeaker(),
             content: html,
-            user: game.user.id,
+            author: game.user.id,
             // style: CONST.CHAT_MESSAGE_STYLES.ROLL,
             sound: CONFIG.sounds.dice,
             rolls: data.allRolls
@@ -528,9 +528,9 @@ export class WarhammerItem extends Item {
         const cls = getDocumentClass("ChatMessage");
         const msg = new cls(messageData);
         // Either create or return the data
-        if ( create ) return cls.create(msg.toObject(), { rollMode });
+        if ( create ) return cls.create(msg.toObject(), { messageMode });
         else {
-            if ( rollMode ) msg.applyRollMode(rollMode);
+            if ( messageMode ) msg.applyMode(messageMode);
             return msg.toObject();
         }
     }

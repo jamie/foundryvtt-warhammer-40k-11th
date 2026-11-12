@@ -63,33 +63,33 @@ Hooks.once('init', function () {
     CONFIG.statusEffects = [
         {
             id: "battleshocked",
-            label: "Battleshocked",
-            icon: "icons/svg/skull.svg"
+            name: "Battleshocked",
+            img: "icons/svg/skull.svg"
         },
         {
             id: "suppressed",
-            label: "Suppressed",
-            icon: "icons/svg/downgrade.svg"
+            name: "Suppressed",
+            img: "icons/svg/downgrade.svg"
         },
         {
             id: "stealth",
-            label: "Stealth",
-            icon: "icons/svg/blind.svg"
+            name: "Stealth",
+            img: "icons/svg/blind.svg"
         },
         {
             id: "cover",
-            label: "Benefit of Cover",
-            icon: "icons/svg/shield.svg"
+            name: "Benefit of Cover",
+            img: "icons/svg/shield.svg"
         },
         {
             id: "advance",
-            label: "Advanced",
-            icon: "icons/svg/up.svg"
+            name: "Advanced",
+            img: "icons/svg/up.svg"
         },
         {
             id: "fallback",
-            label: "Fell Back",
-            icon: "icons/svg/cowled.svg"
+            name: "Fell Back",
+            img: "icons/svg/cowled.svg"
         }
     ];
 

@@ -51,14 +51,14 @@ export class PhaseHUD extends foundry.appv1.api.Application {
 
         if (action === "advance") {
             const move = parseInt(actor.system.stats.move) || 0;
-            const roll = await new Roll("1d6").evaluate({ async: true });
+            const roll = await new Roll("1d6").evaluate();
             roll.toMessage({
                 speaker: ChatMessage.getSpeaker({ actor: actor }),
                 flavor: `<strong>Advances!</strong><br>Base: ${move}" + Roll: ${roll.total}" = <strong>${move + roll.total}"</strong>`
             });
         }
         else if (action === "charge") {
-            const roll = await new Roll("2d6").evaluate({ async: true });
+            const roll = await new Roll("2d6").evaluate();
             roll.toMessage({
                 speaker: ChatMessage.getSpeaker({ actor: actor }),
                 flavor: `<strong>Charge!</strong><br>Distance: <strong>${roll.total}"</strong>`
