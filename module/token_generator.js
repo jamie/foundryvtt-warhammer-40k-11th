@@ -39,7 +39,7 @@ export class TokenGenerator {
             // but let's try to upload to a folder. 
             // We usually check if source exists.
             // For now, let's try "data" source.
-            const result = await FilePicker.upload("data", uploadDir, file, { bucket: null });
+            const result = await foundry.applications.apps.FilePicker.implementation.upload("data", uploadDir, file, { bucket: null });
             return result.path;
         } catch (e) {
             console.error("Token Generation | Upload failed:", e);
@@ -48,8 +48,8 @@ export class TokenGenerator {
             // Users might need to create the folder manually or we rely on it creating it?
             // "If the target directory does not exist, it will be marked as invalid."
             try {
-                await FilePicker.createDirectory("data", uploadDir);
-                const result = await FilePicker.upload("data", uploadDir, file, { bucket: null });
+                await foundry.applications.apps.FilePicker.implementation.createDirectory("data", uploadDir);
+                const result = await foundry.applications.apps.FilePicker.implementation.upload("data", uploadDir, file, { bucket: null });
                 return result.path;
             } catch (err2) {
                 console.error("Token Generation | Could not create directory or upload:", err2);
