@@ -1,5 +1,5 @@
 
-export const SYSTEM_ID = "warhammer-40k-10th"
+export const SYSTEM_ID = "warhammer-40k-11th"
 export function mmToInch(mm) {
     return mm*0.039370
 }

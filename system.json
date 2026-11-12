@@ -1,13 +1,21 @@
 {
-  "id": "warhammer-40k-10th",
+  "id": "warhammer-40k-11th",
   "version": "#{VERSION}#",
-  "title": "Warhammer 40K 10th edition",
-  "description": "An implementation of the Warhammer 40K 10th edition ruleset",
+  "title": "Warhammer 40K 11th edition",
+  "description": "An implementation of the Warhammer 40K 11th edition ruleset",
   "license": "LICENSE.txt",
   "authors": [
     {
-      "name": "daniel-tickell ",
+      "name": "Ward-Ceyssens",
+      "url": "https://github.com/Ward-Ceyssens"
+    },
+    {
+      "name": "daniel-tickell",
       "url": "https://github.com/daniel-tickell"
+    },
+    {
+      "name": "jamie-macey",
+      "url": "https://github.com/jamie"
     }
   ],
   "esmodules": [
